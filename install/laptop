@@ -31,18 +31,6 @@ else
   sudo chown -R "${LOGNAME}:admin" "$HOMEBREW_PREFIX"
 fi
 
-update_fish_shell() {
-  local shell_path;
-  shell_path="$(command -v fish)"
-
-  laptop_echo "Changing your shell to fish ..."
-  if ! grep "$shell_path" /etc/shells > /dev/null 2>&1 ; then
-    laptop_echo "Adding '${shell_path}' to /etc/shells"
-    echo "$shell_path" | sudo tee -a /etc/shells
-  fi
-  sudo chsh -s "$shell_path" "$USER"
-}
-
 update_zsh_shell() {
   local shell_path;
   shell_path="$(command -v zsh)"
@@ -66,6 +54,9 @@ gem_install_or_update() {
 if ! command -v brew >/dev/null; then
   laptop_echo "Installing Homebrew ..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "${HOME}/.zprofile"
+    eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
 if brew list | grep -Fq brew-cask; then
@@ -128,20 +119,9 @@ cask "font-fira-code-nerd-font"
 cask "iterm2"
 EOF
 
-case "$DEFAULT_SHELL" in
-  fish)
-    laptop_echo "Your shell preference is set to FISH..."
-    update_fish_shell
-    ;;
-  zsh)
-    laptop_echo "Your shell preference is set to ZSH..."
-    update_zsh_shell
-    ;;
-  *)
-    laptop_echo "No shell preference detected. Using FISH..."
-    update_fish_shell
-    ;;
-esac
+
+laptop_echo "Your shell preference is set to ZSH..."
+update_zsh_shell
 
 laptop_echo "Configuring asdf version manager..."
 if [ ! -d "${HOME}/.asdf" ]; then
@@ -185,12 +165,8 @@ bundle config --global jobs $((number_of_cores - 1))
 
 laptop_echo "Installing default gems..."
 gem install bundler
-gem install haml_lint
-gem install neovim
 gem install pry
 gem install rubocop
-gem install tmuxinator
-gem install solargraph
 
 laptop_echo "Installing Node..."
 bash "${HOME}/.asdf/plugins/nodejs/bin/import-release-team-keyring"
