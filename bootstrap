@@ -26,9 +26,9 @@ osname=$(uname)
 export COMMANDLINE_TOOLS="/Library/Developer/CommandLineTools"
 export OLD_DOTFILES_BAK="${HOME}/old_dotfiles_bak"
 export DICTIONARY_DIR="${HOME}/Library/Spelling"
-export DOTFILES_REPO_URL="https://github.com/joshukraine/dotfiles.git"
+export DOTFILES_REPO_URL="https://github.com/delneet/dotfiles.git"
 export DOTFILES_DIR="${HOME}/dotfiles"
-export BOOTSTRAP_REPO_URL="https://github.com/joshukraine/mac-bootstrap.git"
+export BOOTSTRAP_REPO_URL="https://github.com/delneet/mac-bootstrap.git"
 export BOOTSTRAP_DIR="${HOME}/mac-bootstrap"
 
 PS3="> "
@@ -44,11 +44,11 @@ else
   DEFAULT_HOST_NAME="$host"
 fi
 
-DEFAULT_BOOTSTRAP_VERSION="v5.1.5"
+DEFAULT_BOOTSTRAP_VERSION="v5.2.0"
 DEFAULT_DOTFILES_BRANCH="master"
-DEFAULT_TIME_ZONE="Europe/Kiev"
-DEFAULT_NODEJS_VERSION="12.18.3"
-DEFAULT_RUBY_VERSION="2.7.1"
+DEFAULT_TIME_ZONE="Europe/Amsterdam"
+DEFAULT_NODEJS_VERSION="16.4.2"
+DEFAULT_RUBY_VERSION="3.0.2"
 
 
 ################################################################################
@@ -57,7 +57,7 @@ DEFAULT_RUBY_VERSION="2.7.1"
 
 if [ "$osname" == "Linux" ]; then
   bootstrap_echo "Oops, looks like you're on a Linux machine. Please have a look at
-  my Linux Bootstrap script: https://github.com/joshukraine/linux-bootstrap"
+  a Linux Bootstrap script: https://github.com/joshukraine/linux-bootstrap"
   exit 1
 elif [ "$osname" != "Darwin" ]; then
   bootstrap_echo "Oops, it looks like you're using a non-UNIX system. This script
@@ -100,7 +100,7 @@ echo "*************************************************************************"
 echo "*******                                                           *******"
 echo "*******                 Welcome to Mac Bootstrap!                 *******"
 echo "*******                                                           *******"
-echo "*******                   https://jsua.co/macos                   *******"
+echo "*******          https://github.com/delneet/mac-bootstrap         *******"
 echo "*******                                                           *******"
 echo "*************************************************************************"
 echo
@@ -154,7 +154,7 @@ read -r -p "> " ASDF_RUBY_VERSION
 export ASDF_RUBY_VERSION=${ASDF_RUBY_VERSION:-$DEFAULT_RUBY_VERSION}
 
 printf "\\nPlease select a default shell.\\n"
-select my_shell in fish zsh
+select my_shell in zsh fish
 do
   case $my_shell in
     fish)
@@ -264,47 +264,11 @@ cp -R "$BOOTSTRAP_DIR"/bin/* "${HOME}/bin/"
 
 bootstrap_echo "Done!"
 
-
 ################################################################################
-# 5. Set up Tmuxinator (https://github.com/tmuxinator/tmuxinator)
-################################################################################
-
-bootstrap_echo "Step 5: Setting up Tmuxinator..."
-
-if [ ! -d "${HOME}/.tmuxinator/" ]; then
-  mkdir "${HOME}/.tmuxinator"
-fi
-
-if [ "$DEFAULT_SHELL" == "zsh" ]; then
-  bootstrap_echo "Installing zsh completions..."
-  wget https://raw.githubusercontent.com/tmuxinator/tmuxinator/master/completion/tmuxinator.zsh -O /usr/local/share/zsh/site-functions/_tmuxinator
-fi
-
-cp "${BOOTSTRAP_DIR}/lib/default.yml" "${HOME}/.tmuxinator/"
-
-bootstrap_echo "Done!"
-
-
-################################################################################
-# 6. Install Ukrainian language utilities
-#
-# Reference:
-# * http://apple.stackexchange.com/a/11842/75491
-# * http://extensions.services.openoffice.org/en/project/ukrainian-dictionary
+# 5. Setup dotfiles
 ################################################################################
 
-bootstrap_echo "Step 6: Installing Ukrainian language utilities..."
-
-cp "$BOOTSTRAP_DIR"/lib/{hyph_uk.dic,uk_UA.aff,uk_UA.dic} "$DICTIONARY_DIR"
-
-bootstrap_echo "Done!"
-
-
-################################################################################
-# 7. Setup dotfiles (http://jsua.co/dotfiles)
-################################################################################
-
-bootstrap_echo "Step 7: Installing dotfiles..."
+bootstrap_echo "Step 5: Installing dotfiles..."
 
 if [[ -d $DOTFILES_DIR ]]; then
   bootstrap_echo "Backing up old dotfiles to ${HOME}/old_dotfiles_bak..."
@@ -329,8 +293,6 @@ echo "**********************************************************************"
 echo "**********************************************************************"
 echo "****                                                              ****"
 echo "**** Mac Bootstrap script complete! Please restart your computer. ****"
-echo "****                                                              ****"
-echo "****                    https://jsua.co/macos                     ****"
 echo "****                                                              ****"
 echo "**********************************************************************"
 echo "**********************************************************************"

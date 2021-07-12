@@ -1,0 +1,6 @@
+#!/bin/bash
+#
+# Push the local branch and set as upstream
+#
+
+git push --set-upstream origin `git symbolic-ref --short HEAD`
