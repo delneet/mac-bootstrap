@@ -23,6 +23,21 @@ bootstrap_echo() {
 
 osname=$(uname)
 
+ARCH=$(uname -p)
+
+if [ "$ARCH" == "arm" ]; then
+  bootstrap_echo "It looks like you are on a M1 mac.
+  it is recommended to run the terminal via Rosetta."
+
+  echo
+  read -p "Continue? (y/n) " -n 1 -r
+  echo
+  if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
+    echo "Exiting..."
+    exit 1
+  fi
+fi
+
 export COMMANDLINE_TOOLS="/Library/Developer/CommandLineTools"
 export OLD_DOTFILES_BAK="${HOME}/old_dotfiles_bak"
 export DICTIONARY_DIR="${HOME}/Library/Spelling"

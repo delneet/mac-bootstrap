@@ -15,6 +15,21 @@ trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
 set -e
 
+ARCH=$(uname -p)
+
+if [ "$ARCH" == "arm" ]; then
+  laptop_echo "It looks like you are on a M1 mac.
+  it is recommended to run the terminal via Rosetta."
+
+  echo
+  read -p "Continue? (y/n) " -n 1 -r
+  echo
+  if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
+    echo "Exiting..."
+    exit 1
+  fi
+fi
+
 if [ ! -d "${HOME}/bin/" ]; then
   mkdir "${HOME}/bin"
 fi
