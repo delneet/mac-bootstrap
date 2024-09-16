@@ -15,6 +15,21 @@ trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
 set -e
 
+ARCH=$(uname -p)
+
+if [ "$ARCH" == "arm" ]; then
+  laptop_echo "It looks like you are on a M1 mac.
+  it is recommended to run the terminal via Rosetta."
+
+  echo
+  read -p "Continue? (y/n) " -n 1 -r
+  echo
+  if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
+    echo "Exiting..."
+    exit 1
+  fi
+fi
+
 if [ ! -d "${HOME}/bin/" ]; then
   mkdir "${HOME}/bin"
 fi
@@ -30,18 +45,6 @@ else
   sudo chflags norestricted "$HOMEBREW_PREFIX"
   sudo chown -R "${LOGNAME}:admin" "$HOMEBREW_PREFIX"
 fi
-
-update_fish_shell() {
-  local shell_path;
-  shell_path="$(command -v fish)"
-
-  laptop_echo "Changing your shell to fish ..."
-  if ! grep "$shell_path" /etc/shells > /dev/null 2>&1 ; then
-    laptop_echo "Adding '${shell_path}' to /etc/shells"
-    echo "$shell_path" | sudo tee -a /etc/shells
-  fi
-  sudo chsh -s "$shell_path" "$USER"
-}
 
 update_zsh_shell() {
   local shell_path;
@@ -66,6 +69,9 @@ gem_install_or_update() {
 if ! command -v brew >/dev/null; then
   laptop_echo "Installing Homebrew ..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "${HOME}/.zprofile"
+    eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
 if brew list | grep -Fq brew-cask; then
@@ -82,103 +88,55 @@ tap "homebrew/cask-fonts"
 tap "homebrew/cask-versions"
 tap "homebrew/core"
 tap "homebrew/services"
-tap "puma/puma"
-tap "universal-ctags/universal-ctags"
 
 # Need to install openssl before libyaml
 brew "openssl"
 brew "openssl@1.1" # wget dependency
 
-brew "advancecomp"
-brew "ansible"
-brew "asciidoctor"
 brew "autoconf" # asdf dependency
 brew "automake" # asdf dependency
 brew "awscli"
 brew "bash"
 brew "bash-completion"
-brew "bat"
-brew "cloc"
 brew "cmake"
 brew "coreutils"
 brew "diff-so-fancy"
-brew "dos2unix"
-brew "exa"
-brew "fish"
-brew "fontforge"
-brew "fzf"
-brew "gifsicle"
+brew "exa" # ls on steroids
+# brew "fish"
+# brew "fzf" # fuzy finder
 brew "git"
 brew "git-quick-stats"
-brew "gmp" # Vim dependency
 brew "gnupg" # asdf-nodejs dependency
-brew "highlight"
 brew "htop"
-brew "httpie"
-brew "imagemagick"
-brew "jhead"
-brew "jq"
+# brew "imagemagick"
 brew "less"
-brew "libtermkey"
 brew "libtool" # asdf dependency
 brew "libxslt" # asdf dependency
 brew "libyaml" # asdf dependency
-brew "media-info"
-brew "memcached"
-brew "mono"
-brew "most"
-brew "multitail"
-brew "neovim", args: ["HEAD"]
-brew "onefetch"
-brew "overmind"
-brew "pandoc"
-brew "perl"
+# brew "memcached"
 brew "pgcli"
-brew "postgresql", restart_service: true
-brew "puma/puma/puma-dev"
+brew "pstree"
 brew "python"
-brew "ranger", link: false
 brew "readline"
-brew "ripgrep"
 brew "rlwrap"
 brew "rsync"
 brew "shellcheck"
-brew "sqlite"
 brew "ssh-copy-id"
 brew "starship"
-brew "the_silver_searcher"
-brew "tldr"
-brew "tmux"
-brew "trash"
 brew "tree"
-brew "universal-ctags/universal-ctags/universal-ctags", args: ["HEAD"]
 brew "unixodbc" # asdf dependency
-brew "w3m"
 brew "wget"
-brew "xz"
 brew "zsh"
 
 # homebrew-cask
 # https://github.com/caskroom/homebrew-cask
 cask "font-fira-code-nerd-font"
-cask "alacritty"
-cask "iterm2-beta"
+cask "iterm2"
 EOF
 
-case "$DEFAULT_SHELL" in
-  fish)
-    laptop_echo "Your shell preference is set to FISH..."
-    update_fish_shell
-    ;;
-  zsh)
-    laptop_echo "Your shell preference is set to ZSH..."
-    update_zsh_shell
-    ;;
-  *)
-    laptop_echo "No shell preference detected. Using FISH..."
-    update_fish_shell
-    ;;
-esac
+
+laptop_echo "Your shell preference is set to ZSH..."
+update_zsh_shell
 
 laptop_echo "Configuring asdf version manager..."
 if [ ! -d "${HOME}/.asdf" ]; then
@@ -222,12 +180,8 @@ bundle config --global jobs $((number_of_cores - 1))
 
 laptop_echo "Installing default gems..."
 gem install bundler
-gem install haml_lint
-gem install neovim
 gem install pry
 gem install rubocop
-gem install tmuxinator
-gem install solargraph
 
 laptop_echo "Installing Node..."
 bash "${HOME}/.asdf/plugins/nodejs/bin/import-release-team-keyring"
@@ -236,25 +190,6 @@ echo "Node --> $(command -v node)"
 node -v
 echo "NPM --> $(command -v npm)"
 npm -v
-
-laptop_echo "Installing default npm packages..."
-npm install -g @vue/cli
-npm install -g gulp-cli
-npm install -g http-server
-npm install -g neovim
-npm install -g pug
-npm install -g stylelint
-npm install -g typescript
-npm install -g vue-language-server
-
-laptop_echo "Installing Python support for Neovim..."
-echo "Python 3 --> $(command -v python3)"
-python3 --version
-echo "Python 2 --> $(command -v python)"
-python --version
-sudo easy_install pip
-python3 -m pip install --user --upgrade pynvim
-python2 -m pip install --user --upgrade pynvim
 
 if [ ! -d "${HOME}/.yarn" ]; then
   laptop_echo "Installing Yarn..."
